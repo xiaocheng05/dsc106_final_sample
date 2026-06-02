@@ -87,7 +87,7 @@ canvas {
 }
 
 .title-slide {
-    background: linear-gradient(135deg, #1a5490 0%, #2e86ab 50%, #4a9fd8 100%);
+    background: linear-gradient(135deg, #1a5490 0%, #c0392b 50%, #4a9fd8 100%);
     color: white;
     text-align: center;
     position: relative
@@ -138,7 +138,7 @@ canvas {
 }
 
 .slide h2 {
-    color: #2e86ab;
+    color: #c0392b;
     font-size: clamp(2rem, 4vw, 3.2rem);
     line-height: 1.1;
     margin-bottom: .35rem
@@ -165,7 +165,7 @@ canvas {
 .typewriter {
     max-width: 1050px;
     margin: 0 auto;
-    color: #2e86ab
+    color: #c0392b
 }
 
 .typewriter h1 {
@@ -178,7 +178,7 @@ canvas {
     display: inline-block;
     width: 3px;
     height: 1.6em;
-    background: #2e86ab;
+    background: #c0392b;
     margin-left: 2px;
     vertical-align: text-bottom;
     animation: blink .75s step-end infinite
@@ -207,7 +207,7 @@ canvas {
 }
 
 .chain-card span {
-    color: #2e86ab;
+    color: #c0392b;
     font-weight: 800
 }
 
@@ -264,7 +264,7 @@ canvas {
 }
 
 .country:hover {
-    fill: #2e86ab
+    fill: #c0392b
 }
 
 .country.active {
@@ -306,7 +306,7 @@ canvas {
 .info-panel h3,
 .impact-panel h3,
 .chart-container h3 {
-    color: #2e86ab;
+    color: #c0392b;
     font-size: 1.25rem;
     margin-bottom: .75rem
 }
@@ -325,7 +325,7 @@ canvas {
 }
 
 .metric b {
-    color: #2e86ab;
+    color: #c0392b;
     font-size: 1rem;
     white-space: nowrap
 }
@@ -341,11 +341,11 @@ canvas {
 .timeline-controls input {
     grid-column: 1/-1;
     width: 100%;
-    accent-color: #2e86ab
+    accent-color: #c0392b
 }
 
 button {
-    background: #2e86ab;
+    background: #c0392b;
     color: #fff;
     border: none;
     padding: .55rem 1rem;
@@ -516,20 +516,20 @@ button:hover {
 
 .takeaways-header h1 {
     font-size: 2.7rem;
-    color: #2e86ab
+    color: #c0392b
 }
 
 .takeaways-divider {
     width: 100px;
     height: 4px;
-    background: linear-gradient(90deg, #2e86ab, #14b8a6);
+    background: linear-gradient(90deg, #c0392b, #14b8a6);
     margin: .7rem auto;
     border-radius: 2px
 }
 
 .takeaways-main-message {
     background: linear-gradient(135deg, #e8f4f8, #f0f8ff);
-    border-left: 5px solid #2e86ab;
+    border-left: 5px solid #c0392b;
     border-radius: 12px;
     padding: 1.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, .08)
@@ -545,7 +545,7 @@ button:hover {
 }
 
 .main-message-text strong {
-    color: #2e86ab
+    color: #c0392b
 }
 
 .takeaways-key-points {
@@ -574,7 +574,7 @@ button:hover {
 }
 
 .takeaways-action {
-    background: linear-gradient(135deg, #2e86ab, #14b8a6);
+    background: linear-gradient(135deg, #c0392b, #14b8a6);
     border-radius: 12px;
     padding: 1.5rem;
     color: white;
@@ -646,7 +646,7 @@ button:hover {
 }
 
 .indicator-dot.active {
-    background: #2e86ab;
+    background: #c0392b;
     width: 12px;
     height: 12px
 }
