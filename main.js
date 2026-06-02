@@ -92,13 +92,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function loadData() {
   d3.csv("global_yearly.csv", (d) => ({ year: +d.year, od550aer: +d.od550aer, tas_c: +d.tas_c, tas_anomaly: +d.tas_anomaly })).then((data) => {
-    drawSlide3Chart(data);
     drawSlide4Chart(data);
+
+    const startSlider = document.getElementById("startYearSlider");
+    const endSlider   = document.getElementById("endYearSlider");
+    const startLabel  = document.getElementById("startYearLabel");
+    const endLabel    = document.getElementById("endYearLabel");
+    const rangeTitle  = document.getElementById("slide3YearRange");
+
+    const fill = document.getElementById("sliderFill");
+    const MIN = 1850, MAX = 2014;
+    function redraw() {
+      const s = Math.min(+startSlider.value, +endSlider.value);
+      const e = Math.max(+startSlider.value, +endSlider.value);
+      startLabel.textContent = s;
+      endLabel.textContent   = e;
+      rangeTitle.textContent = `${s}–${e}`;
+      const pct = (v) => ((v - MIN) / (MAX - MIN)) * 100;
+      fill.style.left  = `${pct(s)}%`;
+      fill.style.right = `${100 - pct(e)}%`;
+      drawSlide3Chart(data.filter((d) => d.year >= s && d.year <= e));
+    }
+
+    startSlider.addEventListener("input", redraw);
+    endSlider.addEventListener("input", redraw);
+    redraw();
   });
 }
 
 function drawSlide3Chart(data) {
-  const svg = d3.select("#slide3Chart");
+  const svg = d3.select("#slide3Chart"); svg.selectAll("*").remove();
   const { w, h, m } = box(svg, 900, 430);
   const x = d3.scaleLinear().domain(d3.extent(data, (d) => d.year)).range([m.left, w - m.right]);
   const y = d3.scaleLinear().domain(d3.extent(data, (d) => d.tas_anomaly)).nice().range([h - m.bottom, m.top]);
