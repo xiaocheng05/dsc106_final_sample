@@ -460,6 +460,66 @@ button:hover {
     height: 620px
 }
 
+/* ── Scrollytelling ── */
+#temp-scrolly-slide {
+    padding: 0 !important;
+    align-items: stretch !important;
+}
+
+.scrolly-outer {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.scrolly-steps-col {
+    flex: 0 0 340px;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrolly-chart-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.scrolly-sticky {
+    position: sticky;
+    top: 2rem;
+    padding-top: 2rem;
+}
+
+.scrolly-step {
+    min-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 1.5rem 2rem 0;
+    opacity: 0.25;
+    transition: opacity 0.45s ease;
+}
+
+.scrolly-step.active {
+    opacity: 1;
+}
+
+.scrolly-step h3 {
+    color: #c0392b;
+    font-size: 1.35rem;
+    font-family: Georgia, serif;
+    margin-bottom: 0.75rem;
+}
+
+.scrolly-step p {
+    color: #334155;
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
 .year-range-controls {
     margin-top: .75rem;
     padding-top: .75rem;
