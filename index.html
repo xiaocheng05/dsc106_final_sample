@@ -23,24 +23,31 @@
       </p>
     </section>
 
-    <section class="slide scrollable">
-      <div class="slide-content">
-        <div class="slide-text compact-text">
-          <h2>How Has Temperature Changed?</h2>
-          <p>Temperature anomaly measures how much warmer or cooler a year is compared to a baseline average. This chart uses the 1850–1900 pre-industrial period as the baseline, the same reference adopted by CMIP6 climate models and the Paris Agreement. A positive anomaly means that year was warmer than pre-industrial levels; a negative anomaly means it was cooler. Red bars show warmer years; blue bars show cooler ones.</p>
+    <section class="slide scrollable" id="temp-scrolly-slide">
+      <div class="scrolly-outer">
+        <div class="scrolly-steps-col">
+          <div class="scrolly-step active" data-start="1850" data-end="1900">
+            <h3>The Pre-Industrial Baseline</h3>
+            <p>From 1850 to 1900, global temperatures were relatively stable. This period is our "zero line" — the reference from which all warming is measured, as defined by CMIP6 models and the Paris Agreement.</p>
+          </div>
+          <div class="scrolly-step" data-start="1850" data-end="1950">
+            <h3>Early Industrial Warming</h3>
+            <p>As fossil fuel use spread through the early 20th century, temperatures began to creep upward. The warming was gradual at first — partly offset by industrial aerosols that scatter incoming sunlight.</p>
+          </div>
+          <div class="scrolly-step" data-start="1850" data-end="1980">
+            <h3>Mid-Century Turbulence</h3>
+            <p>Between 1950 and 1980, heavy industrial pollution produced aerosols that temporarily cooled parts of the planet. Some years even registered negative anomalies — a brief pause before the dominant trend reasserted itself.</p>
+          </div>
+          <div class="scrolly-step" data-start="1850" data-end="2014">
+            <h3>The Unmistakable Trend</h3>
+            <p>From the 1980s onward, the warming is unambiguous. Clean air regulations reduced the aerosol shield, letting the greenhouse effect take hold. Nearly every recent year sits above the pre-industrial baseline.</p>
+          </div>
         </div>
-        <div class="chart-container wide-card">
-          <h3>Temperature Anomaly <span id="slide3YearRange">1850–2014</span></h3>
-          <svg id="slide3Chart"></svg>
-          <div class="year-range-controls">
-            <div class="dual-slider">
-              <div class="slider-track"><div class="slider-fill" id="sliderFill"></div></div>
-              <input type="range" id="startYearSlider" min="1850" max="2014" value="1850" step="1" />
-              <input type="range" id="endYearSlider" min="1850" max="2014" value="2014" step="1" />
-            </div>
-            <div class="slider-labels">
-              <span id="startYearLabel">1850</span>
-              <span id="endYearLabel">2014</span>
+        <div class="scrolly-chart-col">
+          <div class="scrolly-sticky">
+            <div class="chart-container wide-card">
+              <h3>Temperature Anomaly <span id="slide3YearRange">1850–1900</span></h3>
+              <svg id="slide3Chart"></svg>
             </div>
           </div>
         </div>

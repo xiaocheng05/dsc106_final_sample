@@ -98,39 +98,36 @@ function loadData() {
     d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
   ]).then(([data, stateData, usGeo]) => {
     drawSlide4Chart(data);
-
-    const startSlider = document.getElementById("startYearSlider");
-    const endSlider   = document.getElementById("endYearSlider");
-    const startLabel  = document.getElementById("startYearLabel");
-    const endLabel    = document.getElementById("endYearLabel");
-    const rangeTitle  = document.getElementById("slide3YearRange");
-    const fill = document.getElementById("sliderFill");
-    const MIN = 1850, MAX = 2014;
-
-    function redraw() {
-      const s = Math.min(+startSlider.value, +endSlider.value);
-      const e = Math.max(+startSlider.value, +endSlider.value);
-      startLabel.textContent = s;
-      endLabel.textContent   = e;
-      rangeTitle.textContent = `${s}–${e}`;
-      const pct = v => ((v - MIN) / (MAX - MIN)) * 100;
-      fill.style.left  = `${pct(s)}%`;
-      fill.style.right = `${100 - pct(e)}%`;
-      drawSlide3Chart(data.filter(d => d.year >= s && d.year <= e));
-    }
-
-    startSlider.addEventListener("input", function() {
-      if (+this.value >= +endSlider.value) this.value = +endSlider.value - 1;
-      redraw();
-    });
-    endSlider.addEventListener("input", function() {
-      if (+this.value <= +startSlider.value) this.value = +startSlider.value + 1;
-      redraw();
-    });
-    redraw();
-
+    initScrollyTelling(data);
     initStateMapSlide(stateData, usGeo);
   });
+}
+
+function initScrollyTelling(globalData) {
+  const steps = document.querySelectorAll(".scrolly-step");
+  const rangeTitle = document.getElementById("slide3YearRange");
+
+  function activateStep(step) {
+    steps.forEach(s => s.classList.remove("active"));
+    step.classList.add("active");
+    const start = +step.dataset.start;
+    const end   = +step.dataset.end;
+    rangeTitle.textContent = `${start}–${end}`;
+    drawSlide3Chart(globalData.filter(d => d.year >= start && d.year <= end));
+  }
+
+  if (steps.length) activateStep(steps[0]);
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) activateStep(entry.target);
+    });
+  }, {
+    root: document.getElementById("temp-scrolly-slide"),
+    threshold: 0.5,
+  });
+
+  steps.forEach(step => observer.observe(step));
 }
 
 // ── State Map Slide ──────────────────────────────────────────────────────────
@@ -490,41 +487,58 @@ function drawStateComboChart(data, stateName) {
 }
 
 function drawSlide3Chart(data) {
-  const svg = d3.select("#slide3Chart"); svg.selectAll("*").remove();
-  const { w, h, m } = box(svg, 900, 430);
-  m.left = 82;
-  const x = d3.scaleLinear().domain(d3.extent(data, (d) => d.year)).range([m.left, w - m.right]);
-  const y = d3.scaleLinear().domain(d3.extent(data, (d) => d.tas_anomaly)).nice().range([h - m.bottom, m.top]);
+  const svg = d3.select("#slide3Chart");
+  const W = 900, H = 430, m = { top: 44, right: 28, bottom: 48, left: 64 };
+  const isInit = !svg.select(".s3-bars").empty();
+
+  if (!isInit) {
+    svg.attr("viewBox", `0 0 ${W} ${H}`);
+    svg.append("defs").append("clipPath").attr("id", "slide3Clip")
+      .append("rect").attr("x", m.left).attr("y", m.top)
+      .attr("width", W - m.left - m.right).attr("height", H - m.top - m.bottom);
+    svg.append("g").attr("class", "s3-grid axis").attr("transform", `translate(${m.left},0)`);
+    svg.append("g").attr("class", "s3-x-axis axis").attr("transform", `translate(0,${H - m.bottom})`);
+    svg.append("g").attr("class", "s3-y-axis axis").attr("transform", `translate(${m.left},0)`);
+    svg.append("g").attr("class", "s3-bars").attr("clip-path", "url(#slide3Clip)");
+    svg.append("line").attr("class", "s3-zero")
+      .attr("stroke", "#333").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+    svg.append("text").attr("class", "chart-label").attr("x", W / 2).attr("y", H - 8).attr("text-anchor", "middle").text("Year");
+    svg.append("text").attr("class", "chart-label").attr("transform", "rotate(-90)")
+      .attr("x", -(H / 2)).attr("y", 14).attr("text-anchor", "middle").text("Temperature Anomaly (°C)");
+  }
+
+  const t = d3.transition().duration(650).ease(d3.easeCubicInOut);
+  const x = d3.scaleLinear().domain(d3.extent(data, d => d.year)).range([m.left, W - m.right]);
+  const y = d3.scaleLinear().domain(d3.extent(data, d => d.tas_anomaly)).nice().range([H - m.bottom, m.top]);
   const zero = y(0);
-  const barW = (w - m.left - m.right) / data.length;
+  const barW = (W - m.left - m.right) / data.length;
 
-  svg.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.bottom})`).call(d3.axisBottom(x).ticks(8).tickFormat(d3.format("d")));
-  svg.append("g").attr("class", "axis").attr("transform", `translate(${m.left},0)`).call(d3.axisLeft(y).ticks(5).tickFormat((d) => `${d > 0 ? "+" : ""}${d.toFixed(2)} °C`));
-  svg.append("g").attr("class", "grid").attr("transform", `translate(${m.left},0)`).call(d3.axisLeft(y).ticks(5).tickSize(-(w - m.left - m.right)).tickFormat("")).selectAll("line").attr("class", "grid-line");
+  svg.select(".s3-x-axis").transition(t).call(d3.axisBottom(x).ticks(8).tickFormat(d3.format("d")));
+  svg.select(".s3-y-axis").transition(t).call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d > 0 ? "+" : ""}${d.toFixed(2)} °C`));
+  svg.select(".s3-grid").transition(t)
+    .call(d3.axisLeft(y).ticks(5).tickSize(-(W - m.left - m.right)).tickFormat(""))
+    .selectAll("line").attr("class", "grid-line");
+  svg.select(".s3-zero").transition(t)
+    .attr("x1", m.left).attr("x2", W - m.right).attr("y1", zero).attr("y2", zero);
 
-  svg.append("defs").append("clipPath").attr("id", "slide3Clip")
-    .append("rect").attr("x", m.left).attr("y", m.top)
-    .attr("width", w - m.left - m.right).attr("height", h - m.top - m.bottom);
-
-  svg.append("g").attr("clip-path", "url(#slide3Clip)")
-    .selectAll("rect.bar").data(data).join("rect")
-    .attr("class", "bar")
-    .attr("x", (d) => x(d.year) - barW / 2)
-    .attr("width", Math.max(barW - 0.5, 1))
-    .attr("y", (d) => d.tas_anomaly >= 0 ? y(d.tas_anomaly) : zero)
-    .attr("height", (d) => Math.abs(y(d.tas_anomaly) - zero))
-    .attr("fill", (d) => d.tas_anomaly >= 0 ? "#e53935" : "#2196f3");
-
-  svg.append("line")
-    .attr("x1", m.left).attr("x2", w - m.right).attr("y1", zero).attr("y2", zero)
-    .attr("stroke", "#333").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
-
-  label(svg, "Year", w / 2, h - 8, "middle");
-  svg.append("text").attr("class", "chart-label")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -(h / 2)).attr("y", 14)
-    .attr("text-anchor", "middle")
-    .text("Temperature Anomaly (°C)");
+  svg.select(".s3-bars")
+    .selectAll("rect.bar")
+    .data(data, d => d.year)
+    .join(
+      enter => enter.append("rect").attr("class", "bar")
+        .attr("fill", d => d.tas_anomaly >= 0 ? "#e53935" : "#2196f3")
+        .attr("x", W - m.right)
+        .attr("width", Math.max(barW - 0.5, 1))
+        .attr("y", d => d.tas_anomaly >= 0 ? y(d.tas_anomaly) : zero)
+        .attr("height", d => Math.abs(y(d.tas_anomaly) - zero))
+        .call(e => e.transition(t).attr("x", d => x(d.year) - barW / 2)),
+      update => update.call(u => u.transition(t)
+        .attr("x", d => x(d.year) - barW / 2)
+        .attr("width", Math.max(barW - 0.5, 1))
+        .attr("y", d => d.tas_anomaly >= 0 ? y(d.tas_anomaly) : zero)
+        .attr("height", d => Math.abs(y(d.tas_anomaly) - zero))),
+      exit => exit.call(e => e.transition(t).attr("x", W - m.right).remove())
+    );
 }
 
 function drawSlide4Chart(data) {
