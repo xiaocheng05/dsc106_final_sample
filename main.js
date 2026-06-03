@@ -118,8 +118,14 @@ function loadData() {
       drawSlide3Chart(data.filter(d => d.year >= s && d.year <= e));
     }
 
-    startSlider.addEventListener("input", redraw);
-    endSlider.addEventListener("input", redraw);
+    startSlider.addEventListener("input", function() {
+      if (+this.value >= +endSlider.value) this.value = +endSlider.value - 1;
+      redraw();
+    });
+    endSlider.addEventListener("input", function() {
+      if (+this.value <= +startSlider.value) this.value = +startSlider.value + 1;
+      redraw();
+    });
     redraw();
 
     initStateMapSlide(stateData, usGeo);
