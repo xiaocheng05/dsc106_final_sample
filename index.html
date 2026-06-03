@@ -3,138 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aerosol Footprints: From Haze to Rain</title>
+  <title>Temperature Changes in the United States</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://unpkg.com/topojson-client@3"></script>
 </head>
 <body>
   <div class="slides-container">
     <canvas id="rainCanvas"></canvas>
 
     <section class="slide active title-slide">
-      <h1>Aerosol Footprints</h1>
-      <p class="subtitle">From atmospheric haze to temperature change and shifting precipitation</p>
-      <p class="authors">CMIP6 od550aer · tas · pr · 1850–2014</p>
+      <h1>US Temperature Changes</h1>
+      <p class="subtitle">Subtitle goes here</p>
+      <p class="authors">Authors · Data source</p>
     </section>
 
     <section class="slide">
       <div class="slide-content centered-copy">
-        <div class="typewriter" data-text="Aerosols do not spread evenly across the planet. We explore where aerosol optical depth rises, how temperature changes with it, and how precipitation responds.">
+        <div class="typewriter" data-text="Your intro text goes here.">
           <h1 class="typewriter-text"></h1><span class="cursor"></span>
         </div>
-        <div class="chain-row">
-          <div class="chain-card"><span>01</span><b>od550aer</b><p>Aerosol optical depth describes particles in the atmospheric column.</p></div>
-          <div class="chain-card"><span>02</span><b>Temperature</b><p>Particles can scatter or absorb sunlight, changing surface energy balance.</p></div>
-          <div class="chain-card"><span>03</span><b>Precipitation</b><p>Rainfall responds through moisture, circulation, and warming patterns.</p></div>
-        </div>
       </div>
     </section>
 
-    <section class="slide scrollable" id="globe-slide">
-      <div class="slide-content globe-slide-content">
+    <section class="slide scrollable">
+      <div class="slide-content">
         <div class="slide-text compact-text">
-          <h2>Global Aerosol Map</h2>
-          <p>Drag the Earth, move through years, and click a country to open its climate story.</p>
+          <h2>How Has Temperature Changed?</h2>
+          <p>Annual global surface temperature anomaly relative to the 1850–1900 baseline. Red bars are warmer-than-average years; blue are cooler.</p>
         </div>
-        <div class="globe-grid">
-          <div class="globe-shell">
-            <svg id="globe" viewBox="0 0 860 620"></svg>
-            <div id="tooltip" class="tooltip hidden"></div>
+        <div class="chart-container wide-card">
+          <h3>Temperature Anomaly <span id="slide3YearRange">1850–2014</span></h3>
+          <svg id="slide3Chart"></svg>
+          <div class="year-range-controls">
+            <div class="dual-slider">
+              <div class="slider-track"><div class="slider-fill" id="sliderFill"></div></div>
+              <input type="range" id="startYearSlider" min="1850" max="2014" value="1850" step="1" />
+              <input type="range" id="endYearSlider" min="1850" max="2014" value="2014" step="1" />
+            </div>
+            <div class="slider-labels">
+              <span id="startYearLabel">1850</span>
+              <span id="endYearLabel">2014</span>
+            </div>
           </div>
-          <aside class="info-panel">
-            <h3>Global conditions in <span id="sideYear">1850</span></h3>
-            <div class="metric"><span>Average od550aer</span><b id="globalAod">—</b></div>
-            <div class="metric"><span>Temperature anomaly</span><b id="globalTas">—</b></div>
-            <div class="metric"><span>Precipitation anomaly</span><b id="globalPr">—</b></div>
-            <div class="timeline-controls">
-              <button id="playBtn">Play</button>
-              <label>Year <strong id="yearLabel">1850</strong></label>
-              <input id="yearSlider" type="range" min="1850" max="2014" value="1850" step="1" />
-            </div>
-            <div class="legend-card">
-              <p>od550aer color scale</p>
-              <div class="gradient"></div>
-              <div class="scale-labels"><span>low</span><span>high</span></div>
-            </div>
-            <p class="note">The dots are sampled grid cells. Country outlines provide interaction and geographic context.</p>
-          </aside>
         </div>
       </div>
     </section>
 
-    <section class="slide scrollable" id="country-slide">
-      <div class="slide-content country-slide-content">
+    <section class="slide scrollable">
+      <div class="slide-content">
         <div class="slide-text compact-text">
-          <h2>Country Climate Story</h2>
-          <p>Choose a country to compare aerosol concentration, temperature, and precipitation through time.</p>
+          <h2>Temperature &amp; Aerosol Over Time</h2>
+          <p>Global annual trends in aerosol optical depth and surface temperature from 1850 to 2014.</p>
         </div>
-        <div class="country-nav">
-          <button id="prevCountry">← Prev</button>
-          <select id="countrySelect"></select>
-          <button id="nextCountry">Next →</button>
-        </div>
-        <div class="dashboard-grid">
-          <div class="impact-panel">
-            <h3 id="countryTitle">Select a country</h3>
-            <p id="countryMeaning">Click a country on the globe or use the dropdown.</p>
-            <div class="impact-grid">
-              <div><span>Δ od550aer</span><b id="deltaAod">—</b></div>
-              <div><span>Δ temp</span><b id="deltaTas">—</b></div>
-              <div><span>Δ precip</span><b id="deltaPr">—</b></div>
-            </div>
-            <p class="note">Deltas compare the first available decade with the last available decade.</p>
-          </div>
-          <div class="chart-container wide-card">
-            <h3>Aerosol, temperature, and precipitation over time</h3>
-            <svg id="countryTimeline"></svg>
-          </div>
-        </div>
-        <div class="chart-grid">
-          <div class="chart-container"><h3>od550aer → temperature</h3><svg id="aodTemp"></svg></div>
-          <div class="chart-container"><h3>temperature → precipitation</h3><svg id="tempPr"></svg></div>
-          <div class="chart-container"><h3>Global trend comparison</h3><svg id="globalTrend"></svg></div>
-          <div class="chart-container interpretation">
-            <h3>What this means</h3>
-            <p id="interpretationText">Choose a country to see an interpretation of the association patterns.</p>
-            <div class="mini-metrics">
-              <div><span>AOD ↔ Temp r</span><b id="corrAodTemp">—</b></div>
-              <div><span>Temp ↔ Precip r</span><b id="corrTempPr">—</b></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="slide scrollable" id="ranking-slide">
-      <div class="slide-content ranking-content">
-        <div class="slide-text compact-text">
-          <h2>Where Did Aerosols Change Most?</h2>
-          <p>The bars rank countries by late-period minus early-period od550aer. Click a bar to update the country dashboard.</p>
-        </div>
-        <div class="chart-container ranking-card"><svg id="rankingChart"></svg></div>
-      </div>
-    </section>
-
-    <section class="slide" id="takeaways-slide">
-      <div class="takeaways-container">
-        <div class="takeaways-header">
-          <h1>Key Takeaways</h1>
-          <div class="takeaways-divider"></div>
-        </div>
-        <div class="takeaways-main-message">
-          <div class="message-icon">🌫️</div>
-          <p class="main-message-text"><strong>Aerosol concentration is spatially uneven</strong>, and its relationship with temperature and precipitation changes by country. The visualization helps turn a large climate model dataset into an explorable regional story.</p>
-        </div>
-        <div class="takeaways-key-points">
-          <div class="key-point"><div class="key-point-icon">🌍</div><div class="key-point-text">A globe makes regional aerosol differences visible.</div></div>
-          <div class="key-point"><div class="key-point-icon">📈</div><div class="key-point-text">Country dashboards reveal different climate relationships.</div></div>
-          <div class="key-point"><div class="key-point-icon">🌧️</div><div class="key-point-text">Precipitation is noisy, so it should be read as a pattern to investigate.</div></div>
-        </div>
-        <div class="takeaways-action">
-          <h3>From global signal to local impact</h3>
-          <p>The same global aerosol trend can appear very differently across countries, showing why climate stories need both worldwide context and regional detail.</p>
+        <div class="chart-container wide-card">
+          <h3>od550aer and Temperature (normalized)</h3>
+          <svg id="slide4Chart"></svg>
         </div>
       </div>
     </section>
@@ -145,6 +68,6 @@
   <div id="slide-indicator" class="slide-indicator"></div>
 
   <script src="main.js"></script>
-  <script src="rain-canvas.js"></script>
+  <script src="canvas.js"></script>
 </body>
 </html>
