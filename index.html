@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temperature Changes in the United States</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+</head>
+<body>
+  <div class="slides-container">
+    <canvas id="rainCanvas"></canvas>
+
+    <section class="slide active title-slide">
+      <h1>US Temperature Changes</h1>
+      <p class="subtitle">Subtitle goes here</p>
+      <p class="authors">Authors · Data source</p>
+    </section>
+
+    <section class="slide">
+      <div class="slide-content centered-copy">
+        <div class="typewriter" data-text="Your intro text goes here.">
+          <h1 class="typewriter-text"></h1><span class="cursor"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide scrollable">
+      <div class="slide-content">
+        <div class="slide-text compact-text">
+          <h2>How Has Temperature Changed?</h2>
+          <p>Annual global surface temperature anomaly relative to the 1850–1900 baseline. Red bars are warmer-than-average years; blue are cooler.</p>
+        </div>
+        <div class="chart-container wide-card">
+          <h3>Temperature Anomaly <span id="slide3YearRange">1850–2014</span></h3>
+          <svg id="slide3Chart"></svg>
+          <div class="year-range-controls">
+            <div class="dual-slider">
+              <div class="slider-track"><div class="slider-fill" id="sliderFill"></div></div>
+              <input type="range" id="startYearSlider" min="1850" max="2014" value="1850" step="1" />
+              <input type="range" id="endYearSlider" min="1850" max="2014" value="2014" step="1" />
+            </div>
+            <div class="slider-labels">
+              <span id="startYearLabel">1850</span>
+              <span id="endYearLabel">2014</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide scrollable">
+      <div class="slide-content">
+        <div class="slide-text compact-text">
+          <h2>Explore by State</h2>
+          <p>Click any state to see how its surface temperature relates to aerosol optical depth and CO&#8322; concentration over time (1950–2014).</p>
+        </div>
+        <div class="chart-container wide-card" style="position:relative">
+          <h3 id="stateMapHeading">Select a State</h3>
+          <button id="backToMapBtn">&#8592; Back to Map</button>
+
+          <div id="mapOverview">
+            <div class="map-legend-title">
+              Temperature change since 1960
+            </div>
+
+            <div class="map-legend">
+              <div class="legend-box">
+                <span class="legend-color" style="background:#fff7bc"></span>
+                <span>Very Low (&lt; 0°C)</span>
+              </div>
+
+              <div class="legend-box">
+                <span class="legend-color" style="background:#fee391"></span>
+                <span>Slight Warming (0–0.5°C)</span>
+              </div>
+
+              <div class="legend-box">
+                <span class="legend-color" style="background:#fec44f"></span>
+                <span>Moderate (0.5–1.0°C)</span>
+              </div>
+
+              <div class="legend-box">
+                <span class="legend-color" style="background:#fe9929"></span>
+                <span>Strong (1.0–1.5°C)</span>
+              </div>
+
+              <div class="legend-box">
+                <span class="legend-color" style="background:#d95f0e"></span>
+                <span>Extreme (&gt;1.5°C)</span>
+              </div>
+            </div>
+
+            <div class="map-dashboard">
+              <div id="mapView">
+                <div class="map-year-control">
+                  <span>Year: <strong id="mapYearLabel">1980</strong></span>
+                  <input type="range" id="mapYearSlider" min="1950" max="2014" value="1980" step="1" />
+                </div>
+                <svg id="usMapSvg"></svg>
+              </div>
+
+              <aside class="map-rank-panel">
+                <h4>Warming Rank</h4>
+                <p class="rank-note" id="rankNote">
+                  Temperature change from 1960 to 1980.
+                </p>
+
+                <div class="rank-list-block">
+                  <h5>Fastest Warming</h5>
+                  <ol id="topWarmingList"></ol>
+                </div>
+
+                <div class="rank-list-block">
+                  <h5>Slowest Warming</h5>
+                  <ol id="slowWarmingList"></ol>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <div id="stateDetailView">
+            <aside id="stateNarrativePane" class="state-pane"></aside>
+
+            <section id="stateChartsPane" class="state-pane">
+              <div class="pane-title">Climate variables over time</div>
+              <svg id="stateComboChart"></svg>
+              <p class="chart-note">
+                  Lines are normalized within each variable, so this chart shows trend shape.
+                  Actual changes are shown on the right.
+              </p>
+            </section>
+
+            <aside id="stateSummaryPane" class="state-pane"></aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide scrollable">
+      <div class="slide-content">
+        <div class="slide-text compact-text">
+          <h2>Temperature &amp; Aerosol Over Time</h2>
+          <p>Global annual trends in aerosol optical depth and surface temperature from 1850 to 2014.</p>
+        </div>
+        <div class="chart-container wide-card">
+          <h3>od550aer and Temperature (normalized)</h3>
+          <svg id="slide4Chart"></svg>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <button class="nav-button left" id="prevSlideBtn">&lt;</button>
+  <button class="nav-button right" id="nextSlideBtn">&gt;</button>
+  <div id="slide-indicator" class="slide-indicator"></div>
+
+  <script src="main.js"></script>
+  <script src="canvas.js"></script>
+</body>
+</html>
