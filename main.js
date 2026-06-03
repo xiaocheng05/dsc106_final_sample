@@ -153,34 +153,6 @@ let _stateSummaryLookup = {};
 let _usSummary = {};
 let _mapColorScale = null;
 let _currentMapYear = 1980;
-const climateStories = {
-
-1957: {
-title: "International Geophysical Year",
-text: "Global scientific observations expanded dramatically during the International Geophysical Year (1957–58), laying the foundation for modern climate monitoring."
-},
-
-1980: {
-title: "1980 U.S. Heat Wave",
-text: "A major heat wave and drought affected large parts of the United States, causing agricultural losses and highlighting climate vulnerability."
-},
-
-1989: {
-title: "Warming Trends Become Visible",
-text: "By the late 1980s, many regions had accumulated noticeable warming relative to 1960, while greenhouse gases became a major focus of climate research."
-},
-
-2006: {
-title: "Climate Change Enters Public Focus",
-text: "The release of 'An Inconvenient Truth' increased public awareness of climate change as temperatures continued rising across much of the United States."
-},
-
-2013: {
-title: "IPCC Confirms Human Influence",
-text: "The IPCC Fifth Assessment Report concluded that warming is unequivocal and that human influence is the dominant cause of observed warming since the mid-20th century."
-}
-
-};
 
 function initStateMapSlide(stateData, usGeo) {
   _stateClimateData = stateData;
@@ -253,37 +225,16 @@ function initStateMapSlide(stateData, usGeo) {
   const slider = document.getElementById("mapYearSlider");
   const yearLabel = document.getElementById("mapYearLabel");
   slider.addEventListener("input", function() {
-
     _currentMapYear = +this.value;
-
     yearLabel.textContent = _currentMapYear;
-
     updateMapColors();
-
     renderWarmingRankLists();
-
-    updateClimateStory();
-
-    updateTimelineMarkers();
-
   });
 
   document.getElementById("backToMapBtn").addEventListener("click", backToMap);
   backToMap();
   updateMapColors();
   renderWarmingRankLists();
-  updateClimateStory();
-  updateTimelineMarkers();
-}
-
-function updateTimelineMarkers(){
-
-  d3.selectAll(".timeline-marker")
-    .classed("active-marker", false);
-
-  d3.select(`.timeline-marker[data-year="${_currentMapYear}"]`)
-    .classed("active-marker", true);
-
 }
 
 function mean(arr, key) {
@@ -354,29 +305,6 @@ function updateMapColors() {
 
     return _mapColorScale(tempChange);
   });
-}
-
-function updateClimateStory(){
-
-  const box =
-    document.getElementById("storyContent");
-
-  const story =
-    climateStories[_currentMapYear];
-
-  if(!story){
-
-    box.innerHTML =
-      "Move the timeline to explore important climate milestones.";
-
-    return;
-  }
-
-  box.innerHTML = `
-    <strong>${story.title}</strong>
-    <br><br>
-    ${story.text}
-  `;
 }
 
 function renderWarmingRankLists() {
