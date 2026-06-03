@@ -488,7 +488,7 @@ function drawStateComboChart(data, stateName) {
 
 function drawSlide3Chart(data) {
   const svg = d3.select("#slide3Chart");
-  const W = 900, H = 430, m = { top: 44, right: 28, bottom: 48, left: 64 };
+  const W = 900, H = 430, m = { top: 44, right: 28, bottom: 48, left: 82 };
   const isInit = !svg.select(".s3-bars").empty();
 
   if (!isInit) {
