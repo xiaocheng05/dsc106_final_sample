@@ -89,7 +89,7 @@ function initSlide6() {
   Promise.all([
     d3.csv("state_annual_climate.csv", d3.autoType),
     d3.csv("state_regression_coefficients.csv", d3.autoType),
-    d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-albers-10m.json").catch(() => null),
+    d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").catch(() => null),
   ]).then(([annualRows, coefRows, usMap]) => {
     const co2ByYear = d3.rollup(
       annualRows.filter(d => Number.isFinite(d.co2_ppm)),
@@ -245,8 +245,8 @@ function initSlide6Map() {
   const svg = d3.select("#slide6Map");
   svg.selectAll("*").remove();
 
-  const width = 975;
-  const height = 610;
+  const width = 960;
+  const height = 600;
   svg
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMidYMid meet")
@@ -263,7 +263,8 @@ function initSlide6Map() {
     return;
   }
 
-  const path = d3.geoPath();
+  const projection = d3.geoAlbersUsa().scale(1280).translate([480, 300]);
+  const path = d3.geoPath().projection(projection);
 
   svg.append("g")
     .attr("class", "state-map-layer")
@@ -272,7 +273,6 @@ function initSlide6Map() {
     .join("path")
     .attr("class", "state-map-path")
     .attr("d", path)
-    .attr("transform", d => getSlide6StateTransform(d, path))
     .on("mousemove", (event, d) => {
       event.stopPropagation();
       slide6HoveredStatePath = event.currentTarget;
@@ -296,30 +296,6 @@ function initSlide6Map() {
   slide6MapReady = true;
 }
 
-function getSlide6StateTransform(d, path) {
-  const name = d.properties.name;
-  const [[x0, y0], [x1, y1]] = path.bounds(d);
-  const cx = (x0 + x1) / 2;
-  const cy = (y0 + y1) / 2;
-
-  if (name === "Alaska") {
-    const placement = { x: 140, y: 380, scale: 1.28, rotate: 0 };
-    return getSlide6PlacedTransform(cx, cy, placement);
-  }
-
-  if (name === "Hawaii") {
-    const placement = { x: 160, y: 510, scale: 1.75, rotate: 0 };
-    return getSlide6PlacedTransform(cx, cy, placement);
-  }
-
-  return "translate(115,0)";
-}
-
-function getSlide6PlacedTransform(cx, cy, placement) {
-  const tx = placement.x - placement.scale * cx;
-  const ty = placement.y - placement.scale * cy;
-  return `translate(${tx},${ty}) scale(${placement.scale}) rotate(${placement.rotate},${cx},${cy})`;
-}
 
 function updateSlide6Map(start, end, selectedState) {
   if (!slide6MapReady) {
@@ -381,7 +357,7 @@ function drawSlide6MapLegend(color, start, end) {
   const domain = slide6MapMetric.colorDomain;
   const width = 240;
   const height = 10;
-  const x = 975 - width - 28;
+  const x = 960 - width - 28;
   const y = 560;
   const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
   const gradient = defs.select("#slide6MapGradient").empty()
