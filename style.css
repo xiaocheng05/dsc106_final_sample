@@ -406,15 +406,8 @@ button:hover {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 330px 1fr;
     gap: 1rem
-}
-
-.slide6-map-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 330px;
-    gap: 1rem;
-    align-items: stretch
 }
 
 .impact-grid {
@@ -461,39 +454,6 @@ button:hover {
 
 .wide-card svg {
     height: 430px
-}
-
-.map-card svg {
-    height: 360px
-}
-
-.state-map-path {
-    stroke: #fff;
-    stroke-width: .8;
-    transition: opacity .15s ease, stroke .15s ease
-}
-
-.state-map-path.has-data {
-    cursor: pointer
-}
-
-.state-map-path.has-data:hover {
-    stroke: #111827;
-    stroke-width: 1.4
-}
-
-.state-map-path.no-data {
-    cursor: default
-}
-
-.state-map-path.no-temp {
-    fill: #e5e7eb;
-    opacity: .45
-}
-
-.state-map-path.selected {
-    stroke: #111827;
-    stroke-width: 2.2
 }
 
 .ranking-card svg {
@@ -871,7 +831,6 @@ button:hover {
 
     .globe-grid,
     .dashboard-grid,
-    .slide6-map-grid,
     .chart-grid,
     .chain-row {
         grid-template-columns: 1fr
@@ -1206,12 +1165,6 @@ button:hover {
   font-size: .9rem;
 }
 
-.map-dashboard {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 255px;
-  gap: 18px;
-  align-items: start;
-}
 
 .map-rank-panel {
   padding: 14px;
@@ -1331,4 +1284,154 @@ button:hover {
   .variable-explainer {
     grid-template-columns: 1fr;
   }
+}
+
+
+.climate-story{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.climate-story h4{
+    color:#c0392b;
+    margin-bottom:8px;
+}
+
+#storyContent{
+    font-size:.92rem;
+    line-height:1.5;
+}
+
+.active-marker{
+    background:#c0392b;
+    border-color:#c0392b;
+
+    box-shadow:
+      0 0 0 6px rgba(192,57,43,.15),
+      0 0 15px rgba(192,57,43,.45);
+}
+
+.map-dashboard{
+  display:grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-areas:
+      "map story"
+      "map rank";
+
+  gap:20px;
+  align-items:start;
+}
+
+#mapView{
+  grid-area:map;
+}
+.climate-story{
+  grid-area:story;
+
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
+}
+
+.climate-story h4{
+  color:#c0392b;
+  margin-bottom:10px;
+}
+
+#storyContent{
+  font-size:.95rem;
+  line-height:1.55;
+  color:#333;
+}
+
+.map-rank-panel{
+  grid-area:rank;
+
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
+}
+
+.timeline-wrapper{
+  position:relative;
+  flex:1;
+  height:34px;
+}
+
+.timeline-wrapper input[type="range"]{
+  width:100%;
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:5;
+  accent-color:#c0392b;
+}
+
+.timeline-markers{
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:0;
+  z-index:1;
+  pointer-events:none;
+}
+
+.timeline-marker{
+  position:absolute;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#fff;
+  border:3px solid #cfcfcf;
+  transform:translate(-50%, -50%);
+  box-shadow:0 0 0 3px rgba(255,255,255,.9);
+}
+
+.timeline-marker::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-22px;
+  width:1px;
+  height:28px;
+  background:rgba(192,57,43,.25);
+  transform:translateX(-50%);
+}
+
+.timeline-marker:hover{
+  transform:
+      translate(-50%,-50%)
+      scale(1.25);
+
+  cursor:pointer;
+}
+
+.timeline-marker[data-year="1957"]{ left:10.9%; }
+.timeline-marker[data-year="1980"]{ left:46.9%; }
+.timeline-marker[data-year="1989"]{ left:60.9%; }
+.timeline-marker[data-year="2006"]{ left:87.5%; }
+.timeline-marker[data-year="2013"]{ left:98.4%; }
+
+.timeline-marker.active-marker{
+  background:#c0392b;
+  border-color:#c0392b;
+  box-shadow:
+    0 0 0 8px rgba(192,57,43,.16),
+    0 0 18px rgba(192,57,43,.45);
+}
+
+#storyYear{
+  font-size:1.3rem;
+  font-weight:800;
+  color:#c0392b;
+  margin-bottom:10px;
 }

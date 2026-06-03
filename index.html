@@ -27,7 +27,7 @@
       <div class="slide-content">
         <div class="slide-text compact-text">
           <h2>How Has Temperature Changed?</h2>
-          <p>Temperature anomaly measures how much warmer or cooler a year is compared to a baseline average. This chart uses the 1850–1900 pre-industrial period as the baseline, the same reference adopted by CMIP6 climate models and the Paris Agreement. A positive anomaly means that year was warmer than pre-industrial levels; a negative anomaly means it was cooler. Red bars show warmer years; blue bars show cooler ones.</p>
+          <p>Annual global surface temperature anomaly relative to the 1850–1900 baseline. Red bars are warmer-than-average years; blue are cooler.</p>
         </div>
         <div class="chart-container wide-card">
           <h3>Temperature Anomaly <span id="slide3YearRange">1850–2014</span></h3>
@@ -180,12 +180,57 @@
 
             <div class="map-dashboard">
               <div id="mapView">
+
                 <div class="map-year-control">
-                  <span>Year: <strong id="mapYearLabel">1980</strong></span>
-                  <input type="range" id="mapYearSlider" min="1950" max="2014" value="1980" step="1" />
-                </div>
+
+                  <span>
+                    Year:
+                    <strong id="mapYearLabel">1980</strong>
+                  </span>
+
+                  <div class="timeline-wrapper">
+
+                      <input
+                        type="range"
+                        id="mapYearSlider"
+                        min="1950"
+                        max="2014"
+                        value="1980"
+                        step="1"
+                      />
+
+                      <div class="timeline-markers">
+
+                          <div class="timeline-marker" data-year="1957"></div>
+
+                          <div class="timeline-marker" data-year="1980"></div>
+
+                          <div class="timeline-marker" data-year="1989"></div>
+
+                          <div class="timeline-marker" data-year="2006"></div>
+
+                          <div class="timeline-marker" data-year="2013"></div>
+
+                      </div>
+
+                  </div>
+
+                </div>                
                 <svg id="usMapSvg"></svg>
               </div>
+
+              <div id="climateStory" class="climate-story">
+
+                <h4>Climate Story</h4>
+                
+                <div id="storyYear"></div>
+                <div id="storyContent">
+
+                  Move the timeline to explore important climate milestones.
+
+                </div>
+
+              </div>              
 
               <aside class="map-rank-panel">
                 <h4>Warming Rank</h4>
@@ -242,33 +287,59 @@
         <div class="slide-text compact-text">
           <h2>What Explains Temperature Change?</h2>
           <p>
-            Select a U.S. state and time window from 1960 to 2014 to compare observed
-            temperature change with model-estimated contributions.
+            Select a U.S. state and time window from 1960 to 2014. This view estimates how
+            changes in CO₂, aerosols, and incoming solar radiation are associated with changes
+            in surface temperature.
+          </p>
+          <p class="note">
+            We use a regression model to estimate each factor's contribution. These values show
+            modeled associations, not direct causal proof.
           </p>
         </div>
 
-        <div class="slide6-map-grid">
-          <div class="chart-container map-card">
-            <h3>Average Temperature by State</h3>
-            <svg id="slide6Map"></svg>
-            <div class="year-range-controls">
-              <div class="dual-slider">
-                <div class="slider-track"><div class="slider-fill" id="slide6SliderFill"></div></div>
-                <input type="range" id="slide6StartYear" min="1960" max="2014" value="1960" step="1" />
-                <input type="range" id="slide6EndYear" min="1960" max="2014" value="2014" step="1" />
-              </div>
-              <div class="slider-labels">
-                <span id="slide6StartLabel">1960</span>
-                <span id="slide6EndLabel">2014</span>
-              </div>
-            </div>
+        <div class="variable-explainer">
+          <div class="variable-explainer-card">
+            <span>tas</span>
+            <strong>Surface Air Temperature</strong>
+            <p>
+              This is the temperature outcome we are trying to explain. Observed ΔT shows how
+              much surface temperature changed during the selected time window.
+            </p>
           </div>
 
+          <div class="variable-explainer-card">
+            <span>CO₂</span>
+            <strong>Carbon Dioxide</strong>
+            <p>
+              CO₂ traps heat in the atmosphere. In the model, a positive CO₂ contribution means
+              rising CO₂ is associated with warming.
+            </p>
+          </div>
+
+          <div class="variable-explainer-card">
+            <span>od550aer</span>
+            <strong>Aerosols</strong>
+            <p>
+              Aerosols are tiny particles that can scatter or block sunlight. Their contribution
+              may appear as cooling or warming depending on the selected state and period.
+            </p>
+          </div>
+
+          <div class="variable-explainer-card">
+            <span>rsdt</span>
+            <strong>Incoming Solar Radiation</strong>
+            <p>
+              rsdt measures solar energy reaching the top of the atmosphere. It helps represent
+              how incoming energy relates to temperature change.
+            </p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
           <div class="impact-panel">
             <h3>Attribution Summary</h3>
             <p id="slide6Equation" class="note"></p>
             <div class="impact-grid">
-              <div><span>Average temperature</span><b id="slide6AverageTemp">—</b></div>
               <div><span>Observed ΔT</span><b id="slide6ObservedChange">—</b></div>
               <div><span>Estimated CO₂ contribution</span><b id="slide6Co2Warming">—</b></div>
               <div><span>Estimated aerosol contribution</span><b id="slide6AerosolCooling">—</b></div>
@@ -280,12 +351,21 @@
               <select id="slide6StateSelect" aria-label="Select U.S. state"></select>
             </div>
           </div>
-        </div>
 
-        <div class="dashboard-grid">
           <div class="chart-container wide-card">
             <h3>Factor Contributions Over Time</h3>
             <svg id="slide6Chart"></svg>
+            <div class="year-range-controls">
+              <div class="dual-slider">
+                <div class="slider-track"><div class="slider-fill" id="slide6SliderFill"></div></div>
+                <input type="range" id="slide6StartYear" min="1960" max="2014" value="1960" step="1" />
+                <input type="range" id="slide6EndYear" min="1960" max="2014" value="2014" step="1" />
+              </div>
+              <div class="slider-labels">
+                <span id="slide6StartLabel">1960</span>
+                <span id="slide6EndLabel">2014</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

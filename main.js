@@ -119,14 +119,8 @@ function loadData() {
       drawSlide3Chart(data.filter(d => d.year >= s && d.year <= e));
     }
 
-    startSlider.addEventListener("input", function() {
-      if (+this.value >= +endSlider.value) this.value = +endSlider.value - 1;
-      redraw();
-    });
-    endSlider.addEventListener("input", function() {
-      if (+this.value <= +startSlider.value) this.value = +startSlider.value + 1;
-      redraw();
-    });
+    startSlider.addEventListener("input", redraw);
+    endSlider.addEventListener("input", redraw);
     redraw();
 
     initStateMapSlide(stateData, usGeo);
@@ -156,6 +150,34 @@ let _stateSummaryLookup = {};
 let _usSummary = {};
 let _mapColorScale = null;
 let _currentMapYear = 1980;
+const climateStories = {
+
+1957: {
+title: "International Geophysical Year",
+text: "Global scientific observations expanded dramatically during the International Geophysical Year (1957–58), laying the foundation for modern climate monitoring."
+},
+
+1980: {
+title: "1980 U.S. Heat Wave",
+text: "A major heat wave and drought affected large parts of the United States, causing agricultural losses and highlighting climate vulnerability."
+},
+
+1989: {
+title: "Warming Trends Become Visible",
+text: "By the late 1980s, many regions had accumulated noticeable warming relative to 1960, while greenhouse gases became a major focus of climate research."
+},
+
+2006: {
+title: "Climate Change Enters Public Focus",
+text: "The release of 'An Inconvenient Truth' increased public awareness of climate change as temperatures continued rising across much of the United States."
+},
+
+2013: {
+title: "IPCC Confirms Human Influence",
+text: "The IPCC Fifth Assessment Report concluded that warming is unequivocal and that human influence is the dominant cause of observed warming since the mid-20th century."
+}
+
+};
 
 function initStateMapSlide(stateData, usGeo) {
   _stateClimateData = stateData;
@@ -228,16 +250,37 @@ function initStateMapSlide(stateData, usGeo) {
   const slider = document.getElementById("mapYearSlider");
   const yearLabel = document.getElementById("mapYearLabel");
   slider.addEventListener("input", function() {
+
     _currentMapYear = +this.value;
+
     yearLabel.textContent = _currentMapYear;
+
     updateMapColors();
+
     renderWarmingRankLists();
+
+    updateClimateStory();
+
+    updateTimelineMarkers();
+
   });
 
   document.getElementById("backToMapBtn").addEventListener("click", backToMap);
   backToMap();
   updateMapColors();
   renderWarmingRankLists();
+  updateClimateStory();
+  updateTimelineMarkers();
+}
+
+function updateTimelineMarkers(){
+
+  d3.selectAll(".timeline-marker")
+    .classed("active-marker", false);
+
+  d3.select(`.timeline-marker[data-year="${_currentMapYear}"]`)
+    .classed("active-marker", true);
+
 }
 
 function mean(arr, key) {
@@ -308,6 +351,29 @@ function updateMapColors() {
 
     return _mapColorScale(tempChange);
   });
+}
+
+function updateClimateStory(){
+
+  const box =
+    document.getElementById("storyContent");
+
+  const story =
+    climateStories[_currentMapYear];
+
+  if(!story){
+
+    box.innerHTML =
+      "Move the timeline to explore important climate milestones.";
+
+    return;
+  }
+
+  box.innerHTML = `
+    <strong>${story.title}</strong>
+    <br><br>
+    ${story.text}
+  `;
 }
 
 function renderWarmingRankLists() {
@@ -492,7 +558,6 @@ function drawStateComboChart(data, stateName) {
 function drawSlide3Chart(data) {
   const svg = d3.select("#slide3Chart"); svg.selectAll("*").remove();
   const { w, h, m } = box(svg, 900, 430);
-  m.left = 82;
   const x = d3.scaleLinear().domain(d3.extent(data, (d) => d.year)).range([m.left, w - m.right]);
   const y = d3.scaleLinear().domain(d3.extent(data, (d) => d.tas_anomaly)).nice().range([h - m.bottom, m.top]);
   const zero = y(0);
@@ -519,12 +584,7 @@ function drawSlide3Chart(data) {
     .attr("x1", m.left).attr("x2", w - m.right).attr("y1", zero).attr("y2", zero)
     .attr("stroke", "#333").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
 
-  label(svg, "Year", w / 2, h - 8, "middle");
-  svg.append("text").attr("class", "chart-label")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -(h / 2)).attr("y", 14)
-    .attr("text-anchor", "middle")
-    .text("Temperature Anomaly (°C)");
+  label(svg, "Temperature anomaly relative to 1850–1900 baseline", m.left, m.top - 10);
 }
 
 function drawSlide4Chart(data) {
@@ -546,12 +606,7 @@ function drawSlide4Chart(data) {
     svg.append("path").datum(s.values).attr("class", "line").attr("stroke", s.color).attr("d", lineGen)
   );
   legend(svg, series, m.left, m.top - 18);
-  label(svg, "Year", w / 2, h - 8, "middle");
-  svg.append("text").attr("class", "chart-label")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -(h / 2)).attr("y", 16)
-    .attr("text-anchor", "middle")
-    .text("Normalized Value (0–1)");
+  label(svg, "Normalized (0–1 within each variable)", m.left, m.top + 22);
   svg.append("rect")
     .attr("x", m.left).attr("y", m.top)
     .attr("width", w - m.left - m.right).attr("height", h - m.top - m.bottom)
