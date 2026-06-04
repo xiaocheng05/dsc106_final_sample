@@ -231,20 +231,42 @@
 
             <aside id="stateSummaryPane" class="state-pane"></aside>
           </div>
+
+          <div id="stateAttributionSection" style="display:none; margin-top:1rem;">
+            <div class="slide6-map-grid">
+              <div class="chart-container wide-card">
+                <h3>Factor Contributions Over Time</h3>
+                <div class="year-range-controls" style="margin:.5rem 0 .75rem">
+                  <div class="dual-slider">
+                    <div class="slider-track"><div class="slider-fill" id="slide6SliderFill"></div></div>
+                    <input type="range" id="slide6StartYear" min="1960" max="2014" value="1960" step="1" />
+                    <input type="range" id="slide6EndYear" min="1960" max="2014" value="2014" step="1" />
+                  </div>
+                  <div class="slider-labels">
+                    <span id="slide6StartLabel">1960</span>
+                    <span id="slide6EndLabel">2014</span>
+                  </div>
+                </div>
+                <svg id="slide6Chart"></svg>
+              </div>
+              <div class="impact-panel">
+                <h3>Attribution Summary</h3>
+                <p id="slide6Equation" class="note"></p>
+                <div class="impact-grid">
+                  <div><span>Average temperature</span><b id="slide6AverageTemp">—</b></div>
+                  <div><span><span class="series-swatch" style="background:#111827"></span>Observed ΔT</span><b id="slide6ObservedChange">—</b></div>
+                  <div><span><span class="series-swatch" style="background:#e53935"></span>CO₂ contribution</span><b id="slide6Co2Warming">—</b></div>
+                  <div><span><span class="series-swatch" style="background:#2196f3"></span>Aerosol contribution</span><b id="slide6AerosolCooling">—</b></div>
+                  <div><span><span class="series-swatch" style="background:#6b7280"></span>Predicted ΔT</span><b id="slide6PredictedChange">—</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
 
-    <section class="slide scrollable">
-      <div class="slide-content">
-        <div class="slide-text compact-text">
-          <h2>What Explains Temperature Change?</h2>
-          <p>
-            Select a U.S. state and time window from 1960 to 2014 to compare observed
-            temperature change with model-estimated contributions.
-          </p>
-        </div>
 
         <div class="slide6-map-grid">
           <div class="chart-container map-card">
