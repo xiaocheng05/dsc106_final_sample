@@ -195,7 +195,6 @@ function initStateMapSlide(stateData, usGeo) {
       const fips = String(d.id).padStart(2, "0");
       const name = FIPS_TO_STATE[fips];
       if (!name || !stateSet.has(name)) return;
-      d3.select(this).attr("stroke", "#333").attr("stroke-width", 2);
       const row = (_stateYearLookup[name] || {})[_currentMapYear];
       const base = (_stateYearLookup[name] || {})[1960];
 
@@ -213,7 +212,6 @@ function initStateMapSlide(stateData, usGeo) {
         .html(html);
     })
     .on("mouseout", function() {
-      d3.select(this).attr("stroke", "#fff").attr("stroke-width", 0.5);
       d3.select("#mapTooltip").classed("hidden", true);
     })
     .on("click", function(event, d) {
@@ -371,8 +369,14 @@ function showStateDetail(stateName, fips) {
     detailView.style.opacity = "0";
     detailView.style.display = "grid";
 
+    const attrSection = document.getElementById("stateAttributionSection");
+    attrSection.style.opacity = "0";
+    attrSection.style.display = "block";
+
     requestAnimationFrame(() => requestAnimationFrame(() => {
       detailView.style.opacity = "1";
+      attrSection.style.opacity = "1";
+      if (typeof updateSlide6 === "function") updateSlide6(stateName);
     }));
   }, 300);
 }
@@ -393,9 +397,12 @@ function backToMap() {
 
   // Fade detail out, then swap views and fade map in
   detailView.style.opacity = "0";
+  const attrSection = document.getElementById("stateAttributionSection");
+  if (attrSection) attrSection.style.opacity = "0";
   setTimeout(() => {
     detailView.style.display = "none";
-    detailView.style.opacity = "1";   // reset while hidden
+    detailView.style.opacity = "1";
+    if (attrSection) { attrSection.style.display = "none"; attrSection.style.opacity = "1"; }
     mapView.style.opacity = "0";
     mapView.style.display = "block";
     requestAnimationFrame(() => requestAnimationFrame(() => {

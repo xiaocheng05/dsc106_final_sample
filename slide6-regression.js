@@ -1,96 +1,13 @@
 let slide6AnnualData = [];
 let slide6TempData = [];
 let slide6CoefData = [];
-let slide6MapFeatures = [];
-let slide6MapReady = false;
-let slide6HoveredStatePath = null;
-let slide6LastPointerEvent = null;
-
-const slide6MapMetric = {
-  label: "Average tas_c",
-  units: "°C",
-  colorDomain: [-5, 10, 25],
-  colorRange: ["#2563eb", "#f8fafc", "#dc2626"],
-  getValues(start, end) {
-    return d3.rollup(
-      slide6TempData.filter(
-        d => d.year >= start && d.year <= end && Number.isFinite(d.tas_c)
-      ),
-      rows => d3.mean(rows, d => d.tas_c),
-      d => d.state
-    );
-  },
-  format(value) {
-    return Number.isFinite(value) ? `${value.toFixed(1)} °C` : "—";
-  },
-  getColorScale() {
-    return d3.scaleLinear()
-      .domain(this.colorDomain)
-      .range(this.colorRange)
-      .clamp(true);
-  },
-};
-
-const slide6StateFips = {
-  "01": "Alabama",
-  "02": "Alaska",
-  "04": "Arizona",
-  "05": "Arkansas",
-  "06": "California",
-  "08": "Colorado",
-  "09": "Connecticut",
-  "10": "Delaware",
-  "11": "District of Columbia",
-  "12": "Florida",
-  "13": "Georgia",
-  "15": "Hawaii",
-  "16": "Idaho",
-  "17": "Illinois",
-  "18": "Indiana",
-  "19": "Iowa",
-  "20": "Kansas",
-  "21": "Kentucky",
-  "22": "Louisiana",
-  "23": "Maine",
-  "24": "Maryland",
-  "25": "Massachusetts",
-  "26": "Michigan",
-  "27": "Minnesota",
-  "28": "Mississippi",
-  "29": "Missouri",
-  "30": "Montana",
-  "31": "Nebraska",
-  "32": "Nevada",
-  "33": "New Hampshire",
-  "34": "New Jersey",
-  "35": "New Mexico",
-  "36": "New York",
-  "37": "North Carolina",
-  "38": "North Dakota",
-  "39": "Ohio",
-  "40": "Oklahoma",
-  "41": "Oregon",
-  "42": "Pennsylvania",
-  "44": "Rhode Island",
-  "45": "South Carolina",
-  "46": "South Dakota",
-  "47": "Tennessee",
-  "48": "Texas",
-  "49": "Utah",
-  "50": "Vermont",
-  "51": "Virginia",
-  "53": "Washington",
-  "54": "West Virginia",
-  "55": "Wisconsin",
-  "56": "Wyoming",
-};
+let slide6CurrentState = null;
 
 function initSlide6() {
   Promise.all([
     d3.csv("state_annual_climate.csv", d3.autoType),
     d3.csv("state_regression_coefficients.csv", d3.autoType),
-    d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").catch(() => null),
-  ]).then(([annualRows, coefRows, usMap]) => {
+  ]).then(([annualRows, coefRows]) => {
     const co2ByYear = d3.rollup(
       annualRows.filter(d => Number.isFinite(d.co2_ppm)),
       rows => d3.median(rows, d => d.co2_ppm),
@@ -103,10 +20,7 @@ function initSlide6() {
     }));
 
     slide6TempData = annualRows.filter(
-      d =>
-        d.year >= 1960 &&
-        d.year <= 2014 &&
-        Number.isFinite(d.tas_c)
+      d => d.year >= 1960 && d.year <= 2014 && Number.isFinite(d.tas_c)
     );
 
     slide6AnnualData = rowsWithImputedCo2.filter(
@@ -120,28 +34,15 @@ function initSlide6() {
     );
 
     slide6CoefData = coefRows;
-    slide6MapFeatures = getSlide6StateFeatures(usMap);
 
-    const stateSelect = document.getElementById("slide6StateSelect");
-    const states = slide6CoefData.map(d => d.state).sort();
-
-    stateSelect.innerHTML = states
-      .map(s => `<option value="${s}">${s}</option>`)
-      .join("");
-
-    stateSelect.value = states.includes("California") ? "California" : states[0];
-
-    document.getElementById("slide6StateSelect").addEventListener("change", updateSlide6);
-    document.getElementById("slide6StartYear").addEventListener("input", updateSlide6);
-    document.getElementById("slide6EndYear").addEventListener("input", updateSlide6);
-
-    initSlide6Map();
-    updateSlide6();
+    document.getElementById("slide6StartYear").addEventListener("input", () => updateSlide6());
+    document.getElementById("slide6EndYear").addEventListener("input", () => updateSlide6());
   });
 }
 
-function updateSlide6() {
-  const state = document.getElementById("slide6StateSelect").value;
+function updateSlide6(state) {
+  if (state !== undefined) slide6CurrentState = state;
+  if (!slide6CurrentState) return;
 
   const startSlider = document.getElementById("slide6StartYear");
   const endSlider = document.getElementById("slide6EndYear");
@@ -157,14 +58,13 @@ function updateSlide6() {
   fill.style.left = `${pct(start)}%`;
   fill.style.right = `${100 - pct(end)}%`;
 
-  const coef = slide6CoefData.find(d => d.state === state);
-  const selectedAverageTemp = getSlide6AverageTemp(state, start, end);
+  const coef = slide6CoefData.find(d => d.state === slide6CurrentState);
+  const selectedAverageTemp = getSlide6AverageTemp(slide6CurrentState, start, end);
   const stateRows = slide6AnnualData
-    .filter(d => d.state === state && d.year >= start && d.year <= end)
+    .filter(d => d.state === slide6CurrentState && d.year >= start && d.year <= end)
     .sort((a, b) => a.year - b.year);
 
   document.getElementById("slide6AverageTemp").textContent = fmtSlide6AvgTemp(selectedAverageTemp);
-  updateSlide6Map(start, end, state);
 
   if (!coef || stateRows.length < 2) {
     d3.select("#slide6Chart").selectAll("*").remove();
@@ -186,9 +86,9 @@ function updateSlide6() {
   setSlide6Value("slide6PredictedChange", predicted, "#6b7280");
 
   document.getElementById("slide6Equation").innerHTML =
-    `Model: tas anomaly = ${coef.intercept.toFixed(2)} 
-    + ${coef.beta_co2.toExponential(2)}·CO₂ 
-    + ${coef.beta_od550aer.toFixed(2)}·od550aer 
+    `Model: tas anomaly = ${coef.intercept.toFixed(2)}
+    + ${coef.beta_co2.toExponential(2)}·CO₂
+    + ${coef.beta_od550aer.toFixed(2)}·od550aer
     + ${coef.beta_rsdt.toFixed(2)}·rsdt`;
 
   const chartRows = stateRows.map(d => ({
@@ -199,218 +99,18 @@ function updateSlide6() {
     rsdt: coef.beta_rsdt * (d.rsdt - first.rsdt),
   }));
 
-  chartRows.forEach(d => {
-    d.predicted = d.co2 + d.aerosol + d.rsdt;
-  });
+  chartRows.forEach(d => { d.predicted = d.co2 + d.aerosol + d.rsdt; });
 
   drawSlide6Chart(chartRows);
-}
-
-function getSlide6StateFeatures(usMap) {
-  if (!usMap || typeof topojson === "undefined") return [];
-
-  return topojson
-    .feature(usMap, usMap.objects.states)
-    .features
-    .map(feature => ({
-      ...feature,
-      properties: {
-        ...feature.properties,
-        name:
-          feature.properties?.name ||
-          slide6StateFips[String(feature.id).padStart(2, "0")] ||
-          String(feature.id),
-      },
-    }));
-}
-
-function getSlide6StateAverages(start, end) {
-  return slide6MapMetric.getValues(start, end);
 }
 
 function getSlide6AverageTemp(state, start, end) {
   return d3.mean(
     slide6TempData.filter(
-      d =>
-        d.state === state &&
-        d.year >= start &&
-        d.year <= end &&
-        Number.isFinite(d.tas_c)
+      d => d.state === state && d.year >= start && d.year <= end && Number.isFinite(d.tas_c)
     ),
     d => d.tas_c
   );
-}
-
-function initSlide6Map() {
-  const svg = d3.select("#slide6Map");
-  svg.selectAll("*").remove();
-
-  const width = 960;
-  const height = 600;
-  svg
-    .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("preserveAspectRatio", "xMidYMid meet")
-    .on("click", event => event.stopPropagation())
-    .on("pointerdown", event => event.stopPropagation());
-
-  if (!slide6MapFeatures.length) {
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height / 2)
-      .attr("text-anchor", "middle")
-      .attr("class", "chart-label")
-      .text("Map could not be loaded.");
-    return;
-  }
-
-  const projection = d3.geoAlbersUsa().scale(1280).translate([480, 300]);
-  const path = d3.geoPath().projection(projection);
-
-  svg.append("g")
-    .attr("class", "state-map-layer")
-    .selectAll("path")
-    .data(slide6MapFeatures)
-    .join("path")
-    .attr("class", "state-map-path")
-    .attr("d", path)
-    .on("mousemove", (event, d) => {
-      event.stopPropagation();
-      slide6HoveredStatePath = event.currentTarget;
-      slide6LastPointerEvent = event;
-      showSlide6StateTooltip(event, event.currentTarget);
-    })
-    .on("mouseleave", event => {
-      event.stopPropagation();
-      slide6HoveredStatePath = null;
-      slide6LastPointerEvent = null;
-      hideTooltip();
-    })
-    .on("click", (event, d) => {
-      event.stopPropagation();
-      const name = d.properties.name;
-      if (!d3.select(event.currentTarget).classed("has-data")) return;
-      document.getElementById("slide6StateSelect").value = name;
-      updateSlide6();
-    });
-
-  slide6MapReady = true;
-}
-
-
-function updateSlide6Map(start, end, selectedState) {
-  if (!slide6MapReady) {
-    initSlide6Map();
-  }
-
-  if (!slide6MapFeatures.length) return;
-
-  const averages = getSlide6StateAverages(start, end);
-  const color = slide6MapMetric.getColorScale();
-  const availableStates = new Set(slide6CoefData.map(d => d.state));
-
-  d3.select("#slide6Map")
-    .selectAll(".state-map-path")
-    .each(d => {
-      d.properties.slide6AverageTemp = averages.get(d.properties.name);
-    })
-    .attr("class", d => {
-      const name = d.properties.name;
-      const avg = averages.get(name);
-      return [
-        "state-map-path",
-        Number.isFinite(avg) ? "has-temp" : "no-temp",
-        availableStates.has(name) ? "has-data" : "no-data",
-        name === selectedState ? "selected" : "",
-      ].join(" ");
-    })
-    .attr("fill", d => {
-      const avg = averages.get(d.properties.name);
-      return Number.isFinite(avg) ? color(avg) : "#e5e7eb";
-    });
-
-  drawSlide6MapLegend(color, start, end);
-
-  if (slide6HoveredStatePath && slide6LastPointerEvent) {
-    showSlide6StateTooltip(slide6LastPointerEvent, slide6HoveredStatePath);
-  }
-}
-
-function showSlide6StateTooltip(event, statePath) {
-  const state = d3.select(statePath);
-  const d = state.datum();
-  const avg = d.properties.slide6AverageTemp;
-  const value = Number.isFinite(avg) ? slide6MapMetric.format(avg) : "No temperature data";
-  const modelNote = state.classed("has-data")
-    ? "Click to select"
-    : "No regression model for this state yet";
-
-  showTooltip(
-    event,
-    `<strong>${d.properties.name}</strong><br>Average temperature: ${value}<br>${modelNote}`
-  );
-}
-
-function drawSlide6MapLegend(color, start, end) {
-  const svg = d3.select("#slide6Map");
-  svg.selectAll(".slide6-map-legend").remove();
-
-  const domain = slide6MapMetric.colorDomain;
-  const width = 240;
-  const height = 10;
-  const x = 960 - width - 28;
-  const y = 28;
-  const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
-  const gradient = defs.select("#slide6MapGradient").empty()
-    ? defs.append("linearGradient").attr("id", "slide6MapGradient")
-    : defs.select("#slide6MapGradient");
-
-  gradient
-    .attr("x1", "0%")
-    .attr("x2", "100%")
-    .attr("y1", "0%")
-    .attr("y2", "0%");
-
-  gradient.selectAll("stop")
-    .data(d3.range(0, 1.01, 0.1))
-    .join("stop")
-    .attr("offset", d => `${d * 100}%`)
-    .attr("stop-color", d => color(domain[0] + d * (domain[2] - domain[0])));
-
-  const legend = svg.append("g")
-    .attr("class", "slide6-map-legend")
-    .attr("transform", `translate(${x},${y})`);
-
-  legend.append("rect")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("rx", 5)
-    .attr("fill", "url(#slide6MapGradient)");
-
-  legend.append("text")
-    .attr("class", "chart-label")
-    .attr("x", 0)
-    .attr("y", -8)
-    .text(`${slide6MapMetric.label}, ${start}-${end} fixed scale`);
-
-  legend.append("text")
-    .attr("class", "chart-label")
-    .attr("x", 0)
-    .attr("y", 27)
-    .text(slide6MapMetric.format(domain[0]));
-
-  legend.append("text")
-    .attr("class", "chart-label")
-    .attr("x", width / 2)
-    .attr("y", 27)
-    .attr("text-anchor", "middle")
-    .text(slide6MapMetric.format(domain[1]));
-
-  legend.append("text")
-    .attr("class", "chart-label")
-    .attr("x", width)
-    .attr("y", 27)
-    .attr("text-anchor", "end")
-    .text(slide6MapMetric.format(domain[2]));
 }
 
 function fmtSlide6Temp(v) {
@@ -425,7 +125,7 @@ function setSlide6Value(id, value, color) {
 }
 
 function fmtSlide6AvgTemp(v) {
-  return slide6MapMetric.format(v);
+  return Number.isFinite(v) ? `${v.toFixed(1)} °C` : "—";
 }
 
 function drawSlide6Chart(data) {
@@ -453,11 +153,11 @@ function drawSlide6Chart(data) {
     .attr("stroke-dasharray", "4,3");
 
   const seriesDef = [
-    { key: "observed", label: "Observed ΔT",              color: "#111827" },
-    { key: "predicted", label: "Predicted ΔT",            color: "#6b7280", dash: "6,4" },
-    { key: "co2",      label: "CO₂ contribution",         color: "#e53935" },
-    { key: "aerosol",  label: "Aerosol contribution",      color: "#2196f3" },
-    { key: "rsdt",     label: "Solar radiation",           color: "#f6ae2d" },
+    { key: "observed", label: "Observed ΔT",         color: "#111827" },
+    { key: "predicted", label: "Predicted ΔT",       color: "#6b7280", dash: "6,4" },
+    { key: "co2",      label: "CO₂ contribution",    color: "#e53935" },
+    { key: "aerosol",  label: "Aerosol contribution", color: "#2196f3" },
+    { key: "rsdt",     label: "Solar radiation",      color: "#f6ae2d" },
   ];
 
   const lineGen = d3.line()
@@ -495,7 +195,6 @@ function drawSlide6Chart(data) {
 
   let lockedIdx = -1;
 
-  // Lock hint shown inside chart when a line is pinned
   const lockHint = svg.append("text")
     .attr("class", "chart-label")
     .attr("x", w / 2)
@@ -519,7 +218,6 @@ function drawSlide6Chart(data) {
         paths[i].style("display", visible[i] ? null : "none");
         hoverDots[i].style("display", "none");
         d3.select(this).attr("opacity", visible[i] ? 1 : 0.35);
-        // If the locked line was just hidden, release the lock
         if (!visible[i] && lockedIdx === i) {
           lockedIdx = -1;
           lockHint.style("display", "none");
@@ -558,7 +256,7 @@ function drawSlide6Chart(data) {
     paths.forEach((p, i) => { if (visible[i]) p.attr("stroke-width", 2.4).attr("opacity", 1); });
   };
 
-  const snapYear = (mx) => {
+  const snapYear = mx => {
     const yearPos = x.invert(mx);
     const idx = bisect(data, yearPos, 1);
     const d0 = data[Math.max(0, idx - 1)];
@@ -592,12 +290,10 @@ function drawSlide6Chart(data) {
       const clickedIdx = closestVisibleIdx(pt, my);
 
       if (lockedIdx === clickedIdx) {
-        // Click same line → release lock
         lockedIdx = -1;
         lockHint.style("display", "none");
         resetEmphasis();
       } else {
-        // Lock to the closest line
         lockedIdx = clickedIdx;
         applyEmphasis(lockedIdx);
         lockHint
@@ -610,7 +306,6 @@ function drawSlide6Chart(data) {
       const pt = snapYear(mx);
       const activeIdx = lockedIdx >= 0 ? lockedIdx : closestVisibleIdx(pt, my);
 
-      // Only update emphasis when not locked (locked state is set on click)
       if (lockedIdx < 0) applyEmphasis(activeIdx);
 
       crosshair.style("display", null).attr("x1", x(pt.year)).attr("x2", x(pt.year));
@@ -631,7 +326,6 @@ function drawSlide6Chart(data) {
       crosshair.style("display", "none");
       hoverDots.forEach(dot => dot.style("display", "none"));
       d3.select("#tooltip").classed("hidden", true);
-      // Keep emphasis if a line is locked; otherwise reset
       if (lockedIdx < 0) resetEmphasis();
     });
 }
