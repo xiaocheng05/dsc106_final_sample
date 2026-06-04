@@ -153,6 +153,47 @@ let _stateSummaryLookup = {};
 let _usSummary = {};
 let _mapColorScale = null;
 let _currentMapYear = 1980;
+const climateStories = {
+
+1957:{
+title:"Before Rapid Warming",
+text:"In the late 1950s, the strong nationwide warming seen today had not yet emerged. This year serves as a reference point before decades of greenhouse gas accumulation."
+},
+
+1980:{
+title:"1980 U.S. Heat Wave",
+text:"A major heat wave and drought affected large parts of the United States, causing agricultural losses and highlighting climate vulnerability."
+},
+
+1989:{
+title:"Global Warming Enters Public Debate",
+text:"Following the exceptionally warm years of the late 1980s, scientists increasingly linked rising temperatures to greenhouse gases. Warming became visible across many eastern and central states."
+},
+
+2006:{
+title:"Greenhouse Gas Accumulation",
+text:"By 2006, atmospheric CO₂ concentrations had risen above 380 ppm, increasing heat retention in the climate system. Strong warming became visible across much of the United States, particularly in northern and eastern states."
+},
+
+2013:{
+title:"Record Long-Term Warming",
+text:"By 2013, nearly every state showed warming relative to 1960. Several northern states exceeded +3°C warming, reflecting the long-term accumulation of greenhouse gases in the atmosphere."
+}
+
+};
+
+document
+  .querySelectorAll(".timeline-marker")
+  .forEach(marker => {
+
+    const year = Number(marker.dataset.year);
+
+    const pct =
+      ((year - 1950) / (2014 - 1950)) * 100;
+
+    marker.style.left = `${pct}%`;
+
+});
 
 function initStateMapSlide(stateData, usGeo) {
   _stateClimateData = stateData;
@@ -223,16 +264,71 @@ function initStateMapSlide(stateData, usGeo) {
   const slider = document.getElementById("mapYearSlider");
   const yearLabel = document.getElementById("mapYearLabel");
   slider.addEventListener("input", function() {
+
     _currentMapYear = +this.value;
+
     yearLabel.textContent = _currentMapYear;
+
     updateMapColors();
+
     renderWarmingRankLists();
+
+    updateClimateStory();
+
+    updateTimelineMarkers();
+
   });
 
   document.getElementById("backToMapBtn").addEventListener("click", backToMap);
   backToMap();
+
   updateMapColors();
+
   renderWarmingRankLists();
+
+  updateClimateStory();
+
+  updateTimelineMarkers();
+}
+
+function updateClimateStory(){
+
+  const content =
+    document.getElementById("storyContent");
+
+  const yearBox =
+    document.getElementById("storyYear");
+
+  const story =
+    climateStories[_currentMapYear];
+
+  if(!story){
+
+    yearBox.innerHTML = "";
+
+    content.innerHTML =
+      "Move the timeline to explore important climate milestones.";
+
+    return;
+  }
+
+  yearBox.innerHTML =
+    `<div class="story-year">${_currentMapYear}</div>`;
+
+  content.innerHTML = `
+    <strong>${story.title}</strong>
+    <br><br>
+    ${story.text}
+  `;
+}
+
+function updateTimelineMarkers(){
+
+  d3.selectAll(".timeline-marker")
+    .classed("active-marker", false);
+
+  d3.select(`.timeline-marker[data-year="${_currentMapYear}"]`)
+    .classed("active-marker", true);
 }
 
 function mean(arr, key) {

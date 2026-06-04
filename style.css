@@ -936,6 +936,10 @@ button:hover {
   box-shadow: 0 3px 10px rgba(0,0,0,.25);
 }
 
+#mapView {
+  grid-area: map;
+}
+
 #mapView,
 #stateDetailView,
 #stateAttributionSection {
@@ -1216,8 +1220,11 @@ button:hover {
 
 .map-dashboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 18px;
+  grid-template-columns: 1fr 280px;
+  grid-template-areas:
+    "map story"
+    "map rank";
+  gap: 20px;
   align-items: start;
 }
 
@@ -1257,6 +1264,7 @@ button:hover {
 }
 
 .map-rank-panel {
+  grid-area: rank;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
@@ -1327,8 +1335,11 @@ button:hover {
 
 .map-dashboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 255px;
-  gap: 18px;
+  grid-template-columns: 1fr 280px;
+  grid-template-areas:
+    "map story"
+    "map rank";
+  gap: 20px;
   align-items: start;
 }
 
@@ -1450,4 +1461,96 @@ button:hover {
   .variable-explainer {
     grid-template-columns: 1fr;
   }
+}
+.climate-story{
+  grid-area: story;
+
+  background:#fff;
+
+  border:1px solid #e5e7eb;
+
+  border-radius:14px;
+
+  padding:18px;
+
+  box-shadow:0 10px 28px rgba(0,0,0,.08);
+
+}
+
+.climate-story h4{
+
+  color:#c0392b;
+
+  margin-bottom:12px;
+
+}
+
+.story-year{
+
+  font-size:1.4rem;
+
+  font-weight:900;
+
+  color:#c0392b;
+
+  margin-bottom:10px;
+
+}
+#storyContent{
+  font-size:.95rem;
+  line-height:1.6;
+  color:#334155;
+}
+
+.timeline-wrapper{
+    position:relative;
+    flex:1;
+    height:34px;
+
+    width:100%;
+    min-width:0;
+
+    max-width:none;
+}
+
+.timeline-wrapper input[type="range"]{
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:100%;
+  margin:0;
+  accent-color:#c0392b;
+  z-index:2;
+}
+
+.timeline-markers{
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    height:0;
+    pointer-events:none;
+    z-index:3;
+}
+
+.timeline-marker{
+  position:absolute;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#fff;
+  border:2px solid #cfcfcf;
+  transform:translate(-50%, -50%);
+  box-shadow:0 0 0 3px rgba(255,255,255,.9);
+}
+
+.timeline-marker.active-marker{
+  background:#c0392b;
+  border-color:#c0392b;
+  box-shadow:
+    0 0 0 8px rgba(192,57,43,.16),
+    0 0 18px rgba(192,57,43,.45);
 }
