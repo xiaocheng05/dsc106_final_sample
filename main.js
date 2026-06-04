@@ -210,17 +210,11 @@ function initStateMapSlide(stateData, usGeo) {
     _stateYearLookup[d.state][d.year] = d;
   });
 
-  const tasExtent = d3.extent(stateData, d => d.tas_c);
   _mapColorScale =
-    d3.scaleThreshold()
-      .domain([0, 0.5, 1.0, 1.5])
-      .range([
-      "#fff7bc",
-      "#fee391",
-      "#fec44f",
-      "#fe9929",
-      "#d95f0e"
-      ])
+    d3.scaleDiverging()
+      .domain([3, 0, -2])
+      .interpolator(d3.interpolateRdBu)
+      .clamp(true);
 
   const svg = d3.select("#usMapSvg");
   svg.attr("viewBox", "0 0 960 600");
